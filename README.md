@@ -64,7 +64,7 @@ Using SQL aggregate functions, we are able to quickly generate reports that show
      ```
 
 2. **Configure the URLs**:
-   - To use this scraper, you will need to add **URLs for page 1** of each category you wish to scrape in the urls.py file, as **shown in the example below**. **PLEASE NOTE** that this scraper is specifically designed to work with URLs from one of the largest online fashion retailers in Europe. For privacy purposes, I have not included the retailer's name here. It is important that you source the correct URLs from this specific retailer in order for the scraper to work properly. It is important that you source the correct URLs from this specific retailer and ensure they are for **page 1** of the desired categories, as this is where the scraper will begin.
+   - To use this scraper, you will need to add **URLs for page 1** of each category you wish to scrape in the urls.py file, as **shown in the example below**. **PLEASE NOTE** that this scraper is specifically designed to work with URLs from one of the largest online fashion retailers in Europe. For privacy purposes, I have not included the retailer's name here. It is important that you source the correct URLs from this specific retailer and ensure they are for **page 1** of the desired categories, as this is where the scraper will begin.
    - Example:
 
 <img src="images/urls.jpg" width="600"/>
