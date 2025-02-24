@@ -1,4 +1,5 @@
 import csv
+import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -78,6 +79,7 @@ def extract(list_of_urls: list[str]) -> None:
                     driver.get(url_with_page)
 
                     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+                    time.sleep(0.5)
 
                     all_text = driver.find_element("tag name", "body").text
 
