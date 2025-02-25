@@ -1,24 +1,26 @@
 # Web Scraper for Competitor Price Analysis - Used During 4 Years Running an Off-Price Retail Business
 
-As part of running an off-price retail business for over four years, I developed a custom web scraper to automate the process of gathering pricing data from competitors. This tool allowed me to rapidly collect and analyze pricing for hundreds of thousands of products across various categories, significantly reducing manual labor and improving the efficiency of our pricing strategy.
+As part of running an off-price retail business for over four years, I developed a custom web scraper to automate the process of gathering pricing data from competitors. This tool allowed me to rapidly collect and analyse pricing for hundreds of thousands of products across various categories, significantly reducing manual labour and improving the efficiency of our pricing strategy.
 
-The scraper utilizes Selenium to extract raw product data, which is then transformed and stored in **Snowflake**, a powerful cloud data warehouse. This process enables detailed insights into product prices by category, gender, and brand, helping us stay competitive and agile in the retail market.
+The scraper utilises Selenium to extract raw product data, which is then transformed and stored in **Snowflake**, a powerful cloud data warehouse. Additionally, I leveraged **dbt (Data Build Tool)** to automate the transformation of this raw data into actionable insights, including applying off-price pricing strategies. This process enables detailed insights into product prices by category, gender, and brand, helping us stay competitive and agile in the retail market.
+
 
 ## Features
 
 - **Automated Price Collection**: Scrapes competitor websites for product pricing, reducing the manual effort of gathering price data.
-- **Data Transformation**: Extracts only the relevant data (e.g., price and brand) and organizes it into a structured format for further analysis.
+- **Data Transformation**: Extracts only the relevant data (e.g., price and brand) and organises it into a structured format for further analysis.
 - **Scalable Design**: Handles large volumes of product data and works across multiple categories and genders.
 - **Data Storage in Snowflake**: Saves transformed data into CSV files, which are then loaded into Snowflake after being staged for faster processing.
-- **Efficient Staging with Snowflake**: Utilizes Snowflake's stage area to bulk load CSV files, skipping line-by-line execution for performance improvements.
-  
+- **Efficient Staging with Snowflake**: Utilises Snowflake's stage area to bulk load CSV files, skipping line-by-line execution for performance improvements.
+- **Automatic Pricing Strategy**: Leveraging dbt (Data Build Tool) for automated pricing calculations, transforming raw product data into actionable pricing insights.
+
 ## How It Works
 
 ### Step 1: Web Scraping with Selenium
 The process begins by using Selenium to navigate through product pages of competitor websites, scraping essential details like product names, brands, prices, and other relevant information. For each category of clothing, a URL is formed with pagination support to collect data across multiple pages.
 
 ### Step 2: Raw Data Storage
-The raw data is saved into CSV files, with each file being named according to the gender and category of the products it contains (e.g., `raw_data_womens_dresses.csv`, `raw_data_mens_t-shirts.csv`). This structured naming system helps keep the data organized and easy to track.
+The raw data is saved into CSV files, with each file being named according to the gender and category of the products it contains (e.g., `raw_data_womens_dresses.csv`, `raw_data_mens_t-shirts.csv`). This structured naming system helps keep the data organised and easy to track.
 
 ![Raw Data Example](images/raw_data.jpg)
 
@@ -29,7 +31,13 @@ Once the raw data is collected, a function parses the CSV files, extracting only
 The list of dictionaries is transformed into CSV files, which are then stored in a **Snowflake stage** for loading into Snowflake. The process ensures that if a file already exists in the stage, it is overwritten, avoiding duplication. By using Snowflake's **COPY INTO** command, we efficiently load the data into Snowflake without processing it line by line, which is far more efficient for large data volumes.
 
 ### Step 5: Price Aggregation and Reporting
-Using SQL aggregate functions, we are able to quickly generate reports that show the price ranges, averages, and other key metrics for each product category. This data helps us make more informed decisions about our own pricing strategy, ensuring that we remain competitive in a rapidly changing market.
+Using **dbt (Data Build Tool)**, I have built a transformation model to automatically handle price aggregation, applying off-price strategies and rounding prices to pre-defined tiers. This model **calculates the average price by category, gender, and brand**, applies a **50% discount**, and **rounds the price to the nearest defined pricing tier**, such as `4.99`, `7.99`, and so on.
+
+![Final Model Table in Snowflake](images/snowflake_final_model.jpg)
+
+## SQL Example Images
+
+Here are examples of queries run to aggregate data, calculate average prices, and report on price ranges, which were used during the process:
 
 ![Price Reporting](images/sql.jpg)
 ![Price by Brands](images/sql_brands.jpg)
@@ -79,13 +87,34 @@ Using SQL aggregate functions, we are able to quickly generate reports that show
      ```
      This will allow the application to connect to Snowflake using the credentials defined in the `.env` file.
 
-4. **Run the Scraper**:
+4. **Configure dbt**:
+   - You need to set up a **profile for Snowflake** in `profiles.yml`. A **template** is shown below. This file should be located in the `~/.dbt/` directory. Ensure the Snowflake account, username, and password are correct.
+   
+   **Example `profiles.yml` Template**:
+   ```yaml
+   your_snowflake_profile:
+     target: dev
+     outputs:
+       dev:
+         type: snowflake
+         account: your_account
+         user: your_username
+         password: your_password
+         role: your_role
+         database: your_database
+         warehouse: your_warehouse
+         schema: your_schema
+         threads: 1
+
+   ```
+
+5. **Run the Scraper**:
    - Once the URLs and Snowflake connection are configured, run `main.py` to start the scraping, transformation, and loading process:
      ```bash
      python main.py
      ```
 
-5. **View Data**:
+6. **View Data**:
    - The scraper will automatically collect product data from the specified URLs, transform the raw data, and load it into Snowflake.
    - You can then query Snowflake to generate reports on product pricing by category, gender, and brand.
 
