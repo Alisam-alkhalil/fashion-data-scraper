@@ -33,6 +33,7 @@ Using SQL aggregate functions, we are able to quickly generate reports that show
 
 ![Price Reporting](images/sql.jpg)
 ![Price by Brands](images/sql_brands.jpg)
+![Price by Brands](images/sql_total_items.jpg)
 
 ## Project Structure
 
