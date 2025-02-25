@@ -102,6 +102,10 @@ def overwrite_csv(file: str, data: List[Dict[str, str]]):
         None
     """
 
+    if not data:
+        print("Data is empty. Nothing to write to CSV file.")
+        return
+    
     with open(file, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=data[0].keys())
         writer.writeheader()
