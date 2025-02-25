@@ -25,7 +25,7 @@ def transform(file: str, category: str, gender: str) -> List[Dict[str, str]]:
 
                 if 'From' not in lines[line-1]:
                     item_details['price'] = lines[line].strip().replace('£', '').replace(',', '').replace('"', '')
-                    if '-' in lines[line-2].strip() and len(lines[line-2].strip()) > 15:
+                    if lines[line-2].strip().count('-') >= 2:
                         item_details['brand'] = 'NULL'
                     else:
                         item_details['brand'] = lines[line-2].strip()
@@ -34,7 +34,7 @@ def transform(file: str, category: str, gender: str) -> List[Dict[str, str]]:
 
                 else:
                     item_details['price'] = lines[line].strip().replace('£', '').replace(',', '').replace('"', '')
-                    if '-' in lines[line-3].strip() and len(lines[line-3].strip()) > 15:
+                    if lines[line-3].strip().count('-') >= 2:
                         item_details['brand'] = 'NULL'
                     else:
                         item_details['brand'] = lines[line-3].strip()
@@ -45,7 +45,7 @@ def transform(file: str, category: str, gender: str) -> List[Dict[str, str]]:
 
                 if 'From' not in lines[line-1]:
                     item_details['price'] = lines[line+1].strip().replace('£', '').replace(',', '').replace('"', '')
-                    if '-' in lines[line-2].strip() and len(lines[line-2].strip()) > 15:
+                    if lines[line-2].strip().count('-') >= 2:
                         item_details['brand'] = 'NULL'
                     else:
                         item_details['brand'] = lines[line-2].strip()
@@ -54,7 +54,7 @@ def transform(file: str, category: str, gender: str) -> List[Dict[str, str]]:
 
                 else:
                     item_details['price'] = lines[line+1].strip().replace('£', '').replace(',', '').replace('"', '')
-                    if '-' in lines[line-3].strip() and len(lines[line-3].strip()) > 15:
+                    if lines[line-3].strip().count('-') >= 2:
                         item_details['brand'] = 'NULL'
                     else:
                         item_details['brand'] = lines[line-3].strip()

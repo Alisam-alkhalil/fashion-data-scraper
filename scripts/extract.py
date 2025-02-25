@@ -74,7 +74,7 @@ def extract(list_of_urls: list[str]) -> None:
 
             
             try:
-                for x in range(1):
+                while True:
                     url_with_page = f"{url}{page_number}"
                     driver.get(url_with_page)
 

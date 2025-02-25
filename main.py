@@ -2,6 +2,7 @@ import os
 from scripts.transform import transform
 from scripts.extract import extract
 from scripts.load import load, overwrite_csv
+from scripts.dbt_models import run_dbt_models
 from config.urls import list_of_urls
 import csv
 
@@ -31,7 +32,8 @@ def main() -> None:
             load(file_path)
 
             os.remove(file_path)
-
+            
+    run_dbt_models()
 def parse_filename(filename: str) -> tuple[str, str]:
     """
     Parse a filename of the form "raw_data_<gender>_<category>.csv" into

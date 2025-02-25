@@ -1,0 +1,9 @@
+name: 'fashion_scraper'
+version: '1.0'
+config-version: 2
+profile: 'snowflake_profile'
+
+# Define where your models, macros, etc., are located
+models:
+  fashion_scraper:
+    +materialized: table
