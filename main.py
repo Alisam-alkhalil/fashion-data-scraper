@@ -14,7 +14,8 @@ def main() -> None:
     transforming it, and loading it into a database.
     
     Iterates through CSV files in the RAW_DATA_FOLDER, parses their filenames,
-    applies transformation, loads the resulting data and deletes the CSV file.
+    applies transformation, loads the resulting data and deletes the CSV file. It then runs dbt models
+    to create the final_prices table which gives the final price of each product to sell in-store.
     """
     extract(list_of_urls)
 
@@ -32,7 +33,7 @@ def main() -> None:
             load(file_path)
 
             os.remove(file_path)
-            
+
     run_dbt_models()
 def parse_filename(filename: str) -> tuple[str, str]:
     """
