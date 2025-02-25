@@ -1,14 +1,21 @@
-import mysql.connector
+import os
+import snowflake.connector
 from typing import List, Dict
+import csv
+from dotenv import load_dotenv
 
-host = # Add connection details
-port = 3306
-user = "root"
-password = "root"
+load_dotenv()
 
-def load(data: List[Dict[str, str]]) -> None:
+user = os.getenv('SNOWFLAKE_USER')
+password = os.getenv('SNOWFLAKE_PASSWORD')
+account = os.getenv('SNOWFLAKE_ACCOUNT')
+warehouse = os.getenv('SNOWFLAKE_WAREHOUSE')
+database = os.getenv('SNOWFLAKE_DATABASE')
+schema = os.getenv('SNOWFLAKE_SCHEMA')
+
+def load(file: str) -> None:
     """
-    Load the provided data into a MySQL database.
+    Load the provided data into a Snowflake database.
 
     Args:
         data (List[Dict[str, str]]): A list of dictionaries containing product details such as brand, price, category, and gender.
@@ -19,37 +26,84 @@ def load(data: List[Dict[str, str]]) -> None:
     connection = None
 
     try:
-        connection = mysql.connector.connect(
-            host=host,
-            port=port,
+       
+        connection = snowflake.connector.connect(
             user=user,
-            password=password
+            password=password,
+            account=account,
+            warehouse=warehouse,
+            database=database,
+            schema=schema
         )
 
-        if connection.is_connected():
-            print("Connected to MySQL database")
+        if connection:
+            print("Connected to Snowflake database")
 
             cursor = connection.cursor()
 
-            cursor.execute("CREATE DATABASE IF NOT EXISTS products_db")
-            print("Database created or already exists")
-
-            cursor.execute("USE products_db")
-
-            cursor.execute("CREATE TABLE IF NOT EXISTS products (id INT PRIMARY KEY AUTO_INCREMENT, brand VARCHAR(255), price DECIMAL(10,2), category VARCHAR(255), gender VARCHAR(255))")
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS products (
+                    id INT PRIMARY KEY AUTOINCREMENT,
+                    price FLOAT,
+                    brand STRING,
+                    category STRING,
+                    gender STRING
+                )
+            """)
             print("Table created or already exists")
 
-            for x in data:
-                values = (x["brand"], float(x["price"][1:].replace(",", "")), x["category"], x["gender"])
-                cursor.execute("INSERT INTO products (brand, price, category, gender) VALUES (%s, %s, %s, %s)", values)
+            file_name = os.path.basename(file)
 
+            cursor.execute("CREATE STAGE IF NOT EXISTS products")
+            print("Stage created or already exists")
+
+            print(f'Removing file if it exists in stage...')
+            try:
+                cursor.execute(f"REMOVE @products/{file_name}")
+            except snowflake.connector.errors.ProgrammingError:
+                pass
+            
+            print(f'Uploading {file_name} to stage...')
+
+            cursor.execute(f"PUT file://{file} @products auto_compress=true")
+
+            print(f' {file_name} uploaded to stage')
+
+            copy_sql = f"""
+                COPY INTO products (price, brand, category, gender)
+                FROM @products/{file_name}
+                FILE_FORMAT = (TYPE = 'CSV' FIELD_OPTIONALLY_ENCLOSED_BY = '"' SKIP_HEADER = 1)
+            """
+            cursor.execute(copy_sql)
+        
             connection.commit()
-            print(f"Successfully inserted {len(data)} rows into the 'products' table.")
+            print(f"Successfully inserted {file_name} into the 'products' table.")
 
-    except mysql.connector.Error as err:
+    except snowflake.connector.Error as err:
         print(f"Error: {err}")
 
     finally:
-        if connection and connection.is_connected():
+        if connection:
             connection.close()
             print("Connection closed.")
+
+
+def overwrite_csv(file: str, data: List[Dict[str, str]]):
+    """
+    Overwrite the specified CSV file with the provided data.
+
+    Args:
+        file (str): The path to the CSV file to be overwritten.
+        data (List[Dict[str, str]]): A list of dictionaries containing the data to be written.
+                                     Each dictionary represents a row in the CSV file, with keys
+                                     corresponding to column headers.
+
+    Returns:
+        None
+    """
+
+    with open(file, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=data[0].keys())
+        writer.writeheader()
+        writer.writerows(data)
+

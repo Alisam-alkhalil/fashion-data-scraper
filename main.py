@@ -1,8 +1,9 @@
 import os
 from scripts.transform import transform
 from scripts.extract import extract
-from scripts.load import load
+from scripts.load import load, overwrite_csv
 from config.urls import list_of_urls
+import csv
 
 RAW_DATA_FOLDER = "csv_files/"
 
@@ -12,7 +13,7 @@ def main() -> None:
     transforming it, and loading it into a database.
     
     Iterates through CSV files in the RAW_DATA_FOLDER, parses their filenames,
-    applies transformation, and loads the resulting data.
+    applies transformation, loads the resulting data and deletes the CSV file.
     """
     extract(list_of_urls)
 
@@ -25,7 +26,11 @@ def main() -> None:
 
             transformed_data = transform(file_path, category, gender)
 
-            load(transformed_data)
+            overwrite_csv(file_path, transformed_data)
+
+            load(file_path)
+
+            os.remove(file_path)
 
 def parse_filename(filename: str) -> tuple[str, str]:
     """

@@ -18,38 +18,53 @@ def transform(file: str, category: str, gender: str) -> List[Dict[str, str]]:
         lines = f.readlines()
 
     for line in range(1, len(lines)):
+        try:
+            item_details = {}
 
-        item_details = {}
+            if '£' in lines[line] and "£" not in lines[line+1] and "£" not in lines[line-1]:
 
-        if '£' in lines[line] and "£" not in lines[line+1] and "£" not in lines[line-1]:
+                if 'From' not in lines[line-1]:
+                    item_details['price'] = lines[line].strip().replace('£', '').replace(',', '').replace('"', '')
+                    if '-' in lines[line-2].strip() and len(lines[line-2].strip()) > 15:
+                        item_details['brand'] = 'NULL'
+                    else:
+                        item_details['brand'] = lines[line-2].strip()
+                    item_details['category'] = category
+                    item_details['gender'] = gender
 
-            if 'From' not in lines[line-1]:
-                item_details['price'] = lines[line].strip()
-                item_details['brand'] = lines[line-2].strip()
-                item_details['category'] = category
-                item_details['gender'] = gender
+                else:
+                    item_details['price'] = lines[line].strip().replace('£', '').replace(',', '').replace('"', '')
+                    if '-' in lines[line-3].strip() and len(lines[line-3].strip()) > 15:
+                        item_details['brand'] = 'NULL'
+                    else:
+                        item_details['brand'] = lines[line-3].strip()
+                    item_details['category'] = category
+                    item_details['gender'] = gender
+                        
+            elif '£' in lines[line] and "£" in lines[line+1]:
 
-            else:
-                item_details['price'] = lines[line].strip()
-                item_details['brand'] = lines[line-3].strip()
-                item_details['category'] = category
-                item_details['gender'] = gender
-                    
-        elif '£' in lines[line] and "£" in lines[line+1]:
+                if 'From' not in lines[line-1]:
+                    item_details['price'] = lines[line+1].strip().replace('£', '').replace(',', '').replace('"', '')
+                    if '-' in lines[line-2].strip() and len(lines[line-2].strip()) > 15:
+                        item_details['brand'] = 'NULL'
+                    else:
+                        item_details['brand'] = lines[line-2].strip()
+                    item_details['category'] = category
+                    item_details['gender'] = gender
 
-            if 'From' not in lines[line-1]:
-                item_details['price'] = lines[line+1].strip()
-                item_details['brand'] = lines[line-2].strip()
-                item_details['category'] = category
-                item_details['gender'] = gender
+                else:
+                    item_details['price'] = lines[line+1].strip().replace('£', '').replace(',', '').replace('"', '')
+                    if '-' in lines[line-3].strip() and len(lines[line-3].strip()) > 15:
+                        item_details['brand'] = 'NULL'
+                    else:
+                        item_details['brand'] = lines[line-3].strip()
+                    item_details['category'] = category
+                    item_details['gender'] = gender
+            
+            if item_details:
+                data.append(item_details)
 
-            else:
-                item_details['price'] = lines[line+1].strip()
-                item_details['brand'] = lines[line-3].strip()
-                item_details['category'] = category
-                item_details['gender'] = gender
-        
-        if item_details:
-            data.append(item_details)
+        except Exception as e:
+            print(f"Error processing line {line}: {e}")
 
     return data

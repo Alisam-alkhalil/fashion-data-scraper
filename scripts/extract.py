@@ -74,12 +74,12 @@ def extract(list_of_urls: list[str]) -> None:
 
             
             try:
-                while True:
+                for x in range(1):
                     url_with_page = f"{url}{page_number}"
                     driver.get(url_with_page)
 
                     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-                    time.sleep(0.5)
+                    time.sleep(1)
 
                     all_text = driver.find_element("tag name", "body").text
 
