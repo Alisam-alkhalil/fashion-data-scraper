@@ -17,7 +17,7 @@ def main() -> None:
     applies transformation, loads the resulting data and deletes the CSV file. It then runs dbt models
     to create the final_prices table which gives the final price of each product to sell in-store.
     """
-    # extract(list_of_urls)
+    extract(list_of_urls)
 
     for file in os.listdir(RAW_DATA_FOLDER):
         file_path = os.path.join(RAW_DATA_FOLDER, file)
